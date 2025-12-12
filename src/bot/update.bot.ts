@@ -1,56 +1,69 @@
 import { Hears, On, Start, Update, Ctx, Action } from "nestjs-telegraf";
 import { Context } from "telegraf";
 
-
 @Update()
 export class BotUpdate {
+ 
   @Start()
-  onStart(ctx: any) {
-    ctx.reply(`Hush kelibsiz ${ctx.message!.from.first_name}!`, {
+  async onStart(@Ctx() ctx: Context) {
+    await ctx.reply(`Hush kelibsiz, ${ctx.from?.first_name}!`, {
       reply_markup: {
-        keyboard: [
-          [{ text: "Info" }, { text: "Profile" }],
-          [{ text: "Help" }]
-        ],
+        keyboard: [[{ text: "Info" }, { text: "Profile" }], [{ text: "Help" }]],
         resize_keyboard: true,
-      }
+      },
     });
-    return;
   }
 
-  // @On("text")
-  // onText(ctx: any) {
-  //   ctx.telegraf.sendMessage(ctx.message!.from.id);
-  //   return;
-  // }
-
+  
   @Hears("Info")
-  getInfo(@Ctx() ctx: Context) {
-    return ctx.reply("This is some information about the bot.", {
+  async getInfo(@Ctx() ctx: Context) {
+    await ctx.reply("Kerakli bo‘limni tanlang:", {
       reply_markup: {
         inline_keyboard: [
           [
-            {
-              text: "Shaxsiy",
-              callback_data: "personal_info",
-            },
+            { text: "Shaxsiy", callback_data: "personal_info" },
+            { text: "Texnik", callback_data: "technical_info" },
           ],
-          [
-            {
-              text: "Texnik",
-              callback_data: "technical_info",
-            },
-          ],
-
-        ]
-      }
-    })
-    return
+        ],
+      },
+    });
   }
 
-  @Action("shaxsiy")
-  getprivate(@Ctx() ctx: Context) {
-   ctx.reply("This is your personal information.");
-    return
+ 
+  @Hears("Profile")
+  async profile(@Ctx() ctx: Context) {
+    await ctx.reply(
+      `Sizning profilingiz:\n\nIsm: ${ctx.from?.first_name}\nID: ${ctx.from?.id}`
+    );
+  }
+
+  
+  @Hears("Help")
+  async help(@Ctx() ctx: Context) {
+    await ctx.reply("Yordam bo‘limi. Savollaringiz bo‘lsa yozing.");
+  }
+
+  
+  @Action("personal_info")
+  async personalInfo(@Ctx() ctx: Context) {
+    await ctx.answerCbQuery();
+    await ctx.reply("Bu yerda sizning shaxsiy ma'lumotlaringiz bo‘ladi.");
+  }
+
+  
+  @Action("technical_info")
+  async technicalInfo(@Ctx() ctx: Context) {
+    await ctx.answerCbQuery();
+    await ctx.reply("Texnik ma'lumotlar:");
+  }
+
+  
+  @On("text")
+  async onText(@Ctx() ctx: Context) {
+    if ("text" in (ctx.message || {})) {
+      await ctx.reply(`Siz yozdingiz: ${ctx.message?.text}`);
+    } else {
+      await ctx.reply("Yuborilgan xabar matn emas.");
+    }
   }
 }
