@@ -61,7 +61,11 @@ export class BotUpdate {
   @On("text")
   async onText(@Ctx() ctx: Context) {
     if ("text" in (ctx.message || {})) {
-      await ctx.reply(`Siz yozdingiz: ${ctx.message?.text}`);
+      if (ctx.message && "text" in ctx.message) {
+        await ctx.reply(`Siz yozdingiz: ${ctx.message.text}`);
+      } else {
+        await ctx.reply("Yuborilgan xabar matn emas.");
+      }
     } else {
       await ctx.reply("Yuborilgan xabar matn emas.");
     }
